@@ -40,7 +40,7 @@ public class Main {
                 aesDec.writeMatrixToFile(outputPath, plain);
             }
         }
-        if (args[0].equals("-b")) {
+        if (args[0].equals("–b")) {
             String pathPlain = args[2];
             String pathCypher = args[4];
             String pathOutput = args[6];
@@ -48,9 +48,9 @@ public class Main {
             File fileCypher = new File(pathCypher);
             List[] plainBlocks = getBlocksByFile(filePlain);
             List[] cypherBlocks = getBlocksByFile(fileCypher);
-            AesBreak aesBreak = new AesBreak(plainBlocks, cypherBlocks);
-            List[] keyThree = aesBreak.breakAes();
-            aesBreak.writeMatrixToFile(pathOutput, keyThree);
+            AesBreak aesBreak = new AesBreak();
+            List[] keys = aesBreak.breakAes(plainBlocks, cypherBlocks);
+            aesBreak.writeMatrixToFile(pathOutput, keys);
         }
     }
 
@@ -63,28 +63,6 @@ public class Main {
 //        }
 //        return dividedMessage;
 //    }
-
-
-    /***
-     * Check Which power the number of base 2.
-     *
-     * @param n int.
-     *
-     * @return Integer, number that 2 in he power will equal to the given argument.
-     * will return -1 if the given number is not power of Two
-     */
-    static int whichPowerOfTwo(int n) {
-        if (n == 0 || n % 2 != 0) {
-            return -1;
-        }
-        int counter = 0;
-        while (n != 1) {
-
-            n = n / 2;
-            counter++;
-        }
-        return counter;
-    }
 
     /***
      * return list of blocks from a given file.
@@ -180,7 +158,7 @@ public class Main {
             throw new IllegalArgumentException();
         }
 
-        int dim = whichPowerOfTwo(arr.length);
+        int dim = utils.whichPowerOfTwo(arr.length);
 
         if (dim == -1) {
             throw new IllegalArgumentException("argument array cannot be converted to a NxN form");

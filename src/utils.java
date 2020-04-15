@@ -1,7 +1,6 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.io.FileOutputStream;
-import javax.xml.bind.DatatypeConverter;
 
 public class utils {
 
@@ -49,13 +48,37 @@ public class utils {
                 int xorResult = hexMatField ^ hexKeyField;
 
                 //transform to string formation
-                String encryptedField = String.format("%02x", xorResult).toUpperCase(); //TODO:(guy) - String encryptedField = String.format("%06x", xorResult);
+                String encryptedField = String.format("%02x", xorResult).toUpperCase();
 
                 resultMatrix.get(col).add(row, encryptedField);
             }
         }
 
         return resultMatrix;
+    }
+
+    /***
+     * Shift columns to a given 2-dim ArrayList.
+     * shift each column of index i, i shifts up.
+     *
+     * @param matrixToShift 2-dim ArrayList to shift.
+     *
+     * @return 2-dim ArrayList shifted.
+     */
+    public static ArrayList<ArrayList<String>> shiftCols(ArrayList<ArrayList<String>> matrixToShift) {
+
+        if(matrixToShift == null) {
+            return null;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < i; j++) {
+                String removed = matrixToShift.get(i).remove(0);
+                matrixToShift.get(i).add(matrixToShift.get(i).size(), removed);
+            }
+        }
+
+        return matrixToShift;
     }
 
     /***
@@ -105,10 +128,6 @@ public class utils {
         }
     }
 
-    public static byte[] toByteArray(String s) {
-        return DatatypeConverter.parseHexBinary(s);
-    }
-
     /***
      * Function get a Hex chars array and convert it to byte array
      * Char array form.
@@ -130,6 +149,27 @@ public class utils {
         }
 
         return hexBytes;
+    }
+
+    /***
+     * Check Which power the number of base 2.
+     *
+     * @param n int.
+     *
+     * @return Integer, number that 2 in he power will equal to the given argument.
+     * will return -1 if the given number is not power of Two
+     */
+    public static int whichPowerOfTwo(int n) {
+        if (n == 0 || n % 2 != 0) {
+            return -1;
+        }
+        int counter = 0;
+        while (n != 1) {
+
+            n = n / 2;
+            counter++;
+        }
+        return counter;
     }
 
 }

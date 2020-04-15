@@ -45,15 +45,15 @@ public class AesEnc {
             currentMatToEnc =(ArrayList<ArrayList<String>>) plainText[i];
 
             //iteration 1
-            currentMatToEnc = shiftCols(currentMatToEnc);
+            currentMatToEnc = utils.shiftCols(currentMatToEnc);
             currentMatToEnc = utils.matrixXor(currentMatToEnc, this.key1);
 
             //iteration 2
-            currentMatToEnc = shiftCols(currentMatToEnc);
+            currentMatToEnc = utils.shiftCols(currentMatToEnc);
             currentMatToEnc = utils.matrixXor(currentMatToEnc, this.key2);
 
             //iteration 3
-            currentMatToEnc = shiftCols(currentMatToEnc);
+            currentMatToEnc = utils.shiftCols(currentMatToEnc);
             currentMatToEnc = utils.matrixXor(currentMatToEnc, this.key3);
 
             //insert to encrypted list
@@ -61,30 +61,6 @@ public class AesEnc {
         }
 
         return encrypted;
-    }
-
-    /***
-     * Shift columns to a given 2-dim ArrayList.
-     * shift each column of index i, i shifts up.
-     *
-     * @param matrixToShift 2-dim ArrayList to shift.
-     *
-     * @return 2-dim ArrayList shifted.
-     */
-    public ArrayList<ArrayList<String>> shiftCols(ArrayList<ArrayList<String>> matrixToShift) {
-
-        if(matrixToShift == null) {
-            return null;
-        }
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < i; j++) {
-                String removed = matrixToShift.get(i).remove(0);
-                matrixToShift.get(i).add(matrixToShift.get(i).size(), removed); //TODO:(guy) matrixToShift.get(i).add(matrixToShift.get(i).size(), removed);
-            }
-        }
-
-        return matrixToShift;
     }
 
     /***
