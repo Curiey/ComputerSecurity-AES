@@ -7,8 +7,7 @@ public class AesBreak {
     private String keyOne = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
     private String keyTwo = "00000000000000000000000000000000";
 
-    public AesBreak() {
-    }
+    public AesBreak() {}
 
 
     public List[] breakAes(List[] plainText, List[] cipherText) {
@@ -44,7 +43,7 @@ public class AesBreak {
             return null;
         }
 
-        int dim = utils.whichPowerOfTwo(arr.length());
+        int dim = utils.squareRootInt(arr.length() / 2);
 
         if(dim == -1) {
             return null;

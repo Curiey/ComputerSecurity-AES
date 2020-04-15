@@ -160,6 +160,7 @@ public class utils {
      * will return -1 if the given number is not power of Two
      */
     public static int whichPowerOfTwo(int n) {
+
         if (n == 0 || n % 2 != 0) {
             return -1;
         }
@@ -170,6 +171,30 @@ public class utils {
             counter++;
         }
         return counter;
+    }
+
+    /***
+     * copute the round number of given int n.
+     * return -1 if negative of zero.
+     *
+     * @param n number
+     *
+     * @return squere root of given n.
+     */
+    public static int squareRootInt(int n) {
+
+        if(n == 0 || n < 0) {
+            return -1;
+        }
+
+        int sqrt =  (int)Math.sqrt(n);
+
+        if(Math.pow(sqrt, 2) == n) {
+            return sqrt;
+        }
+        else {
+            return -1;
+        }
     }
 
 }
