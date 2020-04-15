@@ -1,100 +1,91 @@
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 public class AesEnc {
 
-    private List[] plainText;
+    //Fields
     private ArrayList<ArrayList<String>> key1;
     private ArrayList<ArrayList<String>> key2;
     private ArrayList<ArrayList<String>> key3;
 
-    public AesEnc(List[] plainText, List[] keys) {
-        this.plainText = plainText;
+    /***
+     * Constructor.
+     *
+     * @param keys List of Keys to encrypt with.
+     */
+    public AesEnc(List[] keys) {
         this.key1 = (ArrayList<ArrayList<String>>)keys[0];
         this.key2 = (ArrayList<ArrayList<String>>)keys[1];
         this.key3 = (ArrayList<ArrayList<String>>)keys[2];
     }
 
-    public List[] encription() {
+    /***
+     * Get a plainText message and return encrypted message in List form
+     * using the initial keys.
+     *
+     * @param plainText List of 2 dim Arraylist containing Hexadecimal values.
+     *
+     * @return list of 2-dim ArrayList containing encrypted message.
+     */
+    public List[] encryption(List[] plainText) {
 
+        //initial list to encrypted message
         List[] encrypted = new List[plainText.length];
+
+        //declare runner
         ArrayList<ArrayList<String>> currentMatToEnc;
+
         for(int i=0; i<plainText.length; i++) {
 
+            //get current msessage
             currentMatToEnc =(ArrayList<ArrayList<String>>) plainText[i];
 
+            //iteration 1
             currentMatToEnc = shiftCols(currentMatToEnc);
-            currentMatToEnc = xorKeyMatrix(currentMatToEnc, this.key1);
+            currentMatToEnc = utils.matrixXor(currentMatToEnc, this.key1);
+
+            //iteration 2
             currentMatToEnc = shiftCols(currentMatToEnc);
-            currentMatToEnc = xorKeyMatrix(currentMatToEnc, this.key2);
+            currentMatToEnc = utils.matrixXor(currentMatToEnc, this.key2);
+
+            //iteration 3
             currentMatToEnc = shiftCols(currentMatToEnc);
-            currentMatToEnc = xorKeyMatrix(currentMatToEnc, this.key3);
+            currentMatToEnc = utils.matrixXor(currentMatToEnc, this.key3);
+
+            //insert to encrypted list
             encrypted[i] = currentMatToEnc;
         }
-    return encrypted;
-}
 
+        return encrypted;
+    }
 
+    /***
+     * Shift columns to a given 2-dim ArrayList.
+     * shift each column of index i, i shifts up.
+     *
+     * @param matrixToShift 2-dim ArrayList to shift.
+     *
+     * @return 2-dim ArrayList shifted.
+     */
     public ArrayList<ArrayList<String>> shiftCols(ArrayList<ArrayList<String>> matrixToShift) {
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < i; j++) {
                 String removed = matrixToShift.get(i).remove(0);
-                matrixToShift.get(i).add(matrixToShift.get(i).size() - 1, removed);
+                matrixToShift.get(i).add(matrixToShift.get(i).size(), removed); //TODO:(guy) matrixToShift.get(i).add(matrixToShift.get(i).size(), removed);
             }
         }
         return matrixToShift;
     }
 
-    public ArrayList<ArrayList<String>> xorKeyMatrix(ArrayList<ArrayList<String>> matrixToXor, ArrayList<ArrayList<String>> key) {
-
-        ArrayList<ArrayList<String>> resultMatrix = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            resultMatrix.add(new ArrayList<String>());
-        }
-        for (int col = 0; col < 4; col++) {
-            for (int row = 0; row < 4; row++) {
-                String matField = matrixToXor.get(col).get(row);
-                String keyField = key.get(col).get(row);
-                int hexMatField = Integer.parseInt(matField, 16);
-                int hexKeyField = Integer.parseInt(keyField, 16);
-                int xorResult = hexMatField ^ hexKeyField;
-                String encryptedField = String.format("%06x", xorResult);
-                resultMatrix.get(col).add(row, encryptedField);
-            }
-        }
-        return resultMatrix;
+    /***
+     * write 2-dim list to the given output file.
+     *
+     * @param path path to the output file.
+     * @param listMatrixToWrite list containing 2-dim values
+     */
+    public void writeMatrixToFile(String path, List[] listMatrixToWrite)
+    {
+        utils.writeMatrixToFile(path, listMatrixToWrite);
     }
-
-    public void writeMatrixToFile(String path, List[] listMatrixToWrite) {
-
-        if(path == null || listMatrixToWrite == null) {
-            return;
-        }
-
-        int matDim = listMatrixToWrite[0].size();
-        byte[] myByteArray = new byte[matDim * matDim * listMatrixToWrite.length*2];
-        ArrayList<ArrayList<String>> matrixToWrite;
-
-        for (int block = 0; block < listMatrixToWrite.length; block++) {
-
-            matrixToWrite = (ArrayList<ArrayList<String>>)listMatrixToWrite[block];
-
-            for (int i = 0; i < matrixToWrite.size(); i++) {
-                for (int j = 0; j < matrixToWrite.size(); j++) {
-                    String value = matrixToWrite.get(i).get(j);
-
-                    myByteArray[(block*(matDim * matDim) + i * matrixToWrite.size() + j) * 2] = Byte.parseByte(value.substring(0,1));
-                    myByteArray[(block*(matDim * matDim) + i * matrixToWrite.size() + j) * 2 + 1] = Byte.parseByte(value.substring(1));
-                }
-            }
-            try (FileOutputStream fos = new FileOutputStream(path)) {
-                fos.write(myByteArray);
-            } catch (Exception e) {
-                System.out.println("excepion write to file");
-            }
-        }
-    }
-
 }

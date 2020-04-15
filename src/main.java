@@ -1,32 +1,36 @@
 import java.io.File;
-//import javax.xml.bind.DatatypeConverter;
-import java.io.IOException;
+import java.util.List;
+import java.util.Arrays;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        if (args[0].equals("–e") || args[0].equals("–d")) {
 
-        if(args[0].equals("–e")  || args[0].equals("–d")) {
-
+            //Get argument from command
             String pathKeys = args[2];
             String pathContent = args[4];
             String pathOutputCypher = args[6];
+
+            //initial Files
             File fileKeys = new File(pathKeys);
             File filePlain = new File(pathContent);
+
+            //Split to list of blocks
             List[] textBlocks = getBlocksByFile(filePlain);
             List[] keysBlocks = getBlocksByFile(fileKeys);
 
 
             if (args[0].equals("–e")) {
 
-                AesEnc aesEnc = new AesEnc(textBlocks, keysBlocks);
+                //initial keys
+                AesEnc aesEnc = new AesEnc(keysBlocks);
                 aesEnc.writeMatrixToFile(pathOutputCypher, textBlocks);
-                List[] cypher = aesEnc.encription();
+                List[] cypher = aesEnc.encryption(textBlocks);
                 aesEnc.writeMatrixToFile(pathOutputCypher, cypher);
 
             } else if (args[0].equals("-d")) {
@@ -40,7 +44,7 @@ public class Main {
             }
 
         }
-        if(args[0].equals("-b")){
+        if (args[0].equals("-b")) {
             String pathPlain = args[2];
             String pathCypher = args[4];
             String pathOutput = args[6];
@@ -48,9 +52,9 @@ public class Main {
             File fileCypher = new File(pathCypher);
             List[] plainBlocks = getBlocksByFile(filePlain);
             List[] cypherBlocks = getBlocksByFile(fileCypher);
-            AesBreak aesBreak = new AesBreak(plainBlocks,cypherBlocks);
+            AesBreak aesBreak = new AesBreak(plainBlocks, cypherBlocks);
             List[] keyThree = aesBreak.breakAes();
-            aesBreak.writeMatrixToFile(pathOutput,keyThree);
+            aesBreak.writeMatrixToFile(pathOutput, keyThree);
 
 
         }
@@ -67,102 +71,7 @@ public class Main {
 //    }
 
 
-    private static List<List<String>> arrayToMatrix(String[] arr) {
-
-        if (arr == null) {
-            throw new IllegalArgumentException();
-        }
-
-        int dim = whichPowerOfTwo(arr.length);
-
-        if (dim == -1) {
-            throw new IllegalArgumentException();
-        }
-
-        //initial return matrix
-        List<List<String>> matrix = new ArrayList<>();
-        for (int i = 0; i < dim; i++) {
-            matrix.add(new ArrayList<>());
-        }
-
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                matrix.get(i).add(j, arr[i * dim + j]);
-            }
-        }
-        return matrix;
-    }
-
-    /*
-     * This function get a file contain bytes and return String array with
-     * Hexadecimal values.
-     *
-     * @param byteFileToConvertToHexForm File.
-     *
-     * @return String array with the Hexadecimal values
-     * @throws IOException If error wile reading the file occur
-     */
-    public static String[] readByteFileToHex(File byteFileToConvertToHexForm) throws IOException {
-
-        byte[] byteArray = Files.readAllBytes(byteFileToConvertToHexForm.toPath()); // to read a single line from the file
-        char[] chars = bytesToHex(byteArray);
-
-        String[] hexs = new String[chars.length / 2];
-
-        for (int i = 0; i < hexs.length; i++) {
-            hexs[i] = "" + chars[i * 2] + chars[i * 2 + 1];
-        }
-
-        return hexs;
-    }
-
-    /*
-     * Function get a byte array and convert it to Hexadecimal
-     * Char array form.
-     *
-     * @param bytes byte array of data.
-     * @return char array of hexadecimal form.
-     */
-    private static char[] bytesToHex(byte[] bytes) {
-        final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-        char[] hexChars = new char[bytes.length * 2];
-
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-
-        return hexChars;
-    }
-//    public static byte[] toByteArray(String s) {
-//        return DatatypeConverter.parseHexBinary(s);
-//    }
-
-
-    /*
-     * This function check if the given number is power of the number Two.
-     * @param n
-     * @return
-     */
-    static boolean isPowerOfTwo(int n) {
-
-        if (n == 0) {
-            return false;
-        }
-
-        while (n != 1) {
-            if (n % 2 != 0) {
-                return false;
-            }
-
-            n = n / 2;
-        }
-
-        return true;
-    }
-
-    /*
+    /***
      * Check Which power the number of base 2.
      *
      * @param n int.
@@ -183,10 +92,15 @@ public class Main {
         return counter;
     }
 
-
-
-
+    /***
+     * return list of blocks from a given file.
+     *
+     * @param plainFile file to read byte and convert to strings(Hex representation).
+     *
+     * @return list of blocks hex blocks
+     */
     public static List[] getBlocksByFile(File plainFile) {
+
         List[] block = new List[0];
 
         try {
@@ -195,11 +109,13 @@ public class Main {
 
             block = new List[hex.length / 16];
 
+            //split hex array by range of 16 (matrix 4x4)
             String[][] splitKeys = new String[block.length][];
             for (int i = 0; i < splitKeys.length; i++) {
                 splitKeys[i] = Arrays.copyOfRange(hex, i * 16, i * 16 + 16);
             }
 
+            //convert the array to matrix representation
             for (int i = 0; i < splitKeys.length; i++) {
                 block[i] = arrayToMatrix(splitKeys[i]);
             }
@@ -208,8 +124,88 @@ public class Main {
             System.out.println("error in getBlocksByFile");
 
         }
-        return block;
 
+        return block;
     }
+
+    /***
+     * This function get a file contain bytes and return String array with
+     * Hexadecimal values.
+     *
+     * @param byteFileToConvertToHexForm File.
+     *
+     * @return String array with the Hexadecimal values
+     * @throws IOException If error wile reading the file occur
+     */
+    private static String[] readByteFileToHex(File byteFileToConvertToHexForm) throws IOException {
+
+        byte[] byteArray = Files.readAllBytes(byteFileToConvertToHexForm.toPath()); // to read a single line from the file
+        char[] chars = bytesToHex(byteArray);
+
+        String[] hexs = new String[chars.length / 2];
+
+        for (int i = 0; i < hexs.length; i++) {
+            hexs[i] = "" + chars[i * 2] + chars[i * 2 + 1];
+        }
+
+        return hexs;
+    }
+
+    /***
+     * Function get a byte array and convert it to Hexadecimal
+     * Char array form.
+     *
+     * @param bytes byte array of data.
+     * @return char array of hexadecimal form.
+     */
+    private static char[] bytesToHex(byte[] bytes) {
+
+        final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+        char[] hexChars = new char[bytes.length * 2];
+
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+
+        return hexChars;
+    }
+
+    /***
+     * convert a NxN array of strings to a NxN matrix representation.
+     *
+     * @param arr array of strings to convert to NxN format.
+     *
+     * @return 2-dim array contating the given array data.
+     */
+    private static List<List<String>> arrayToMatrix(String[] arr) {
+
+        if (arr == null) {
+            throw new IllegalArgumentException();
+        }
+
+        int dim = whichPowerOfTwo(arr.length);
+
+        if (dim == -1) {
+            throw new IllegalArgumentException("argument array cannot be converted to a NxN form");
+        }
+
+        //initial return matrix
+        List<List<String>> matrix = new ArrayList<>();
+        for (int i = 0; i < dim; i++) {
+            matrix.add(new ArrayList<>());
+        }
+
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                matrix.get(i).add(j, arr[i * dim + j]);
+            }
+        }
+
+        return matrix;
+    }
+
 }
 
