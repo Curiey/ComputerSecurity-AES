@@ -12,37 +12,33 @@ public class Main {
         if (args[0].equals("–e") || args[0].equals("–d")) {
 
             //Get argument from command
-            String pathKeys = args[2];
-            String pathContent = args[4];
-            String pathOutputCypher = args[6];
+            String keysPath = args[2];
+            String plainTextPath = args[4];
+            String outputPath = args[6];
 
             //initial Files
-            File fileKeys = new File(pathKeys);
-            File filePlain = new File(pathContent);
+            File keysFile = new File(keysPath);
+            File plainTextFile = new File(plainTextPath);
 
             //Split to list of blocks
-            List[] textBlocks = getBlocksByFile(filePlain);
-            List[] keysBlocks = getBlocksByFile(fileKeys);
-
+            List[] plainTextSplitToBlocks = getBlocksByFile(plainTextFile);
+            List[] keysSplitToBlocks = getBlocksByFile(keysFile);
 
             if (args[0].equals("–e")) {
 
                 //initial keys
-                AesEnc aesEnc = new AesEnc(keysBlocks);
-                aesEnc.writeMatrixToFile(pathOutputCypher, textBlocks);
-                List[] cypher = aesEnc.encryption(textBlocks);
-                aesEnc.writeMatrixToFile(pathOutputCypher, cypher);
+                AesEnc aesEnc = new AesEnc(keysSplitToBlocks);
+                aesEnc.writeMatrixToFile(outputPath, plainTextSplitToBlocks);
+                List[] cypher = aesEnc.encryption(plainTextSplitToBlocks);
+                aesEnc.writeMatrixToFile(outputPath, cypher);
 
-            } else if (args[0].equals("-d")) {
+            } else if (args[0].equals("–d")) {
 
-                AesDec aesDec = new AesDec(textBlocks, keysBlocks);
-                aesDec.writeMatrixToFile(pathOutputCypher, textBlocks);
-                List[] plain = aesDec.decryption();
-                aesDec.writeMatrixToFile(pathOutputCypher, plain);
-
-
+                AesDec aesDec = new AesDec(keysSplitToBlocks);
+                aesDec.writeMatrixToFile(outputPath, plainTextSplitToBlocks);
+                List[] plain = aesDec.decryption(plainTextSplitToBlocks);
+                aesDec.writeMatrixToFile(outputPath, plain);
             }
-
         }
         if (args[0].equals("-b")) {
             String pathPlain = args[2];
@@ -55,8 +51,6 @@ public class Main {
             AesBreak aesBreak = new AesBreak(plainBlocks, cypherBlocks);
             List[] keyThree = aesBreak.breakAes();
             aesBreak.writeMatrixToFile(pathOutput, keyThree);
-
-
         }
     }
 

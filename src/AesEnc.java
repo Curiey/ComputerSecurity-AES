@@ -29,15 +29,19 @@ public class AesEnc {
      */
     public List[] encryption(List[] plainText) {
 
+        if(plainText == null) {
+            return null;
+        }
+
         //initial list to encrypted message
         List[] encrypted = new List[plainText.length];
 
         //declare runner
         ArrayList<ArrayList<String>> currentMatToEnc;
 
-        for(int i=0; i<plainText.length; i++) {
+        for(int i = 0; i < plainText.length; i++) {
 
-            //get current msessage
+            //get current message
             currentMatToEnc =(ArrayList<ArrayList<String>>) plainText[i];
 
             //iteration 1
@@ -69,12 +73,17 @@ public class AesEnc {
      */
     public ArrayList<ArrayList<String>> shiftCols(ArrayList<ArrayList<String>> matrixToShift) {
 
+        if(matrixToShift == null) {
+            return null;
+        }
+
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < i; j++) {
                 String removed = matrixToShift.get(i).remove(0);
                 matrixToShift.get(i).add(matrixToShift.get(i).size(), removed); //TODO:(guy) matrixToShift.get(i).add(matrixToShift.get(i).size(), removed);
             }
         }
+
         return matrixToShift;
     }
 
