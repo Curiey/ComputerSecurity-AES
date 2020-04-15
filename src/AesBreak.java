@@ -1,5 +1,5 @@
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 public class AesBreak {
 
@@ -10,6 +10,14 @@ public class AesBreak {
     public AesBreak() {}
 
 
+    /***
+     * this function 'break' the key the given message and cipher message was encrypted.
+     *
+     * @param plainText 2-dim array containing hex of the plain text.
+     * @param cipherText 2-dim array containing hex of the cipher text.
+     *
+     * @return List of keys.
+     */
     public List[] breakAes(List[] plainText, List[] cipherText) {
 
         if (plainText == null || cipherText == null) {
@@ -37,6 +45,14 @@ public class AesBreak {
         return keys;
     }
 
+    /***
+     * Convert array of string into matrix NxN of string.
+     * each cell in the array list will be copy as Hex string representation.
+     *
+     * @param arr string to convert to Hex matrix
+     *
+     * @return List NxN with hex values according to the given string.
+     */
     private ArrayList<ArrayList<String>> stringToHexMatrix(String arr) {
 
         if(arr == null) {
