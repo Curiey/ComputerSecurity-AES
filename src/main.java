@@ -1,75 +1,70 @@
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
+//import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class main {
-
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+public class Main {
 
     public static void main(String[] args) {
 
 
-        String str = "9F";
-        byte[] bytes = toByteArray(str);
+        if(args[0].equals("–e")  || args[0].equals("–d")) {
+
+            String pathKeys = args[2];
+            String pathContent = args[4];
+            String pathOutputCypher = args[6];
+            File fileKeys = new File(pathKeys);
+            File filePlain = new File(pathContent);
+            List[] textBlocks = getBlocksByFile(filePlain);
+            List[] keysBlocks = getBlocksByFile(fileKeys);
 
 
-        File keyFile = new File("key_long");
-        List[] keys = new List[0];
+            if (args[0].equals("–e")) {
 
-        try {
+                AesEnc aesEnc = new AesEnc(textBlocks, keysBlocks);
+                aesEnc.writeMatrixToFile(pathOutputCypher, textBlocks);
+                List[] cypher = aesEnc.encription();
+                aesEnc.writeMatrixToFile(pathOutputCypher, cypher);
 
-            String[] hex = readByteFileToHex(keyFile);
+            } else if (args[0].equals("-d")) {
 
-            //print
-            for (int i = 0; i < hex.length; i++) {
-                System.out.print(hex[i]);
+                AesDec aesDec = new AesDec(textBlocks, keysBlocks);
+                aesDec.writeMatrixToFile(pathOutputCypher, textBlocks);
+                List[] plain = aesDec.decryption();
+                aesDec.writeMatrixToFile(pathOutputCypher, plain);
+
+
             }
-            System.out.println();
-
-            keys = new List[hex.length/16];
-
-            String[][] splitKeys = new String[hex.length/16][];
-            for (int i = 0; i < splitKeys.length; i++) {
-                splitKeys[i] = Arrays.copyOfRange(hex, i * 16, i * 16 + 16);
-            }
-
-            for (int i = 0; i < splitKeys.length; i++) {
-                keys[i] = arrayToMatrix(splitKeys[i]);
-            }
-
-            System.out.println("Done");
-
-            System.out.println();
-
-            //print
-            ArrayList<ArrayList<String>> currentArray;
-
-            for (int i = 0; i < keys.length; i++) {
-
-                currentArray = (ArrayList<ArrayList<String>>) keys[i];
-
-                for (int j = 0; j < currentArray.size(); j++) {
-                    for (int k = 0; k < currentArray.size(); k++) {
-
-                        System.out.print(currentArray.get(j).get(k));
-                    }
-                }
-            }
-
-        } catch (IOException e) {
-            System.out.println("error");
 
         }
-        System.out.println(keys);
+        if(args[0].equals("-b")){
+            String pathPlain = args[2];
+            String pathCypher = args[4];
+            String pathOutput = args[6];
+            File filePlain = new File(pathPlain);
+            File fileCypher = new File(pathCypher);
+            List[] plainBlocks = getBlocksByFile(filePlain);
+            List[] cypherBlocks = getBlocksByFile(fileCypher);
+            AesBreak aesBreak = new AesBreak(plainBlocks,cypherBlocks);
+            List[] keyThree = aesBreak.breakAes();
+            aesBreak.writeMatrixToFile(pathOutput,keyThree);
+
+
+        }
     }
 
-    public static byte[] toByteArray(String s) {
-        return DatatypeConverter.parseHexBinary(s);
-    }
+
+//    public static byte[][] divideMessage(byte[] messageToDivide) {
+//        int parts = messageToDivide.length / 128;
+//        byte[][] dividedMessage = new byte[parts][128];
+//        for (int i = 0; i < messageToDivide.length; i = i + 128) {
+//            dividedMessage[i] = Arrays.copyOfRange(messageToDivide, i, i + 128);
+//        }
+//        return dividedMessage;
+//    }
 
 
     private static List<List<String>> arrayToMatrix(String[] arr) {
@@ -86,7 +81,7 @@ public class main {
 
         //initial return matrix
         List<List<String>> matrix = new ArrayList<>();
-        for(int i = 0 ; i < dim; i++) {
+        for (int i = 0; i < dim; i++) {
             matrix.add(new ArrayList<>());
         }
 
@@ -98,7 +93,7 @@ public class main {
         return matrix;
     }
 
-    /***
+    /*
      * This function get a file contain bytes and return String array with
      * Hexadecimal values.
      *
@@ -121,7 +116,7 @@ public class main {
         return hexs;
     }
 
-    /***
+    /*
      * Function get a byte array and convert it to Hexadecimal
      * Char array form.
      *
@@ -129,7 +124,7 @@ public class main {
      * @return char array of hexadecimal form.
      */
     private static char[] bytesToHex(byte[] bytes) {
-
+        final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
         char[] hexChars = new char[bytes.length * 2];
 
         for (int j = 0; j < bytes.length; j++) {
@@ -140,8 +135,12 @@ public class main {
 
         return hexChars;
     }
+//    public static byte[] toByteArray(String s) {
+//        return DatatypeConverter.parseHexBinary(s);
+//    }
 
-    /***
+
+    /*
      * This function check if the given number is power of the number Two.
      * @param n
      * @return
@@ -163,7 +162,7 @@ public class main {
         return true;
     }
 
-    /***
+    /*
      * Check Which power the number of base 2.
      *
      * @param n int.
@@ -183,4 +182,34 @@ public class main {
         }
         return counter;
     }
+
+
+
+
+    public static List[] getBlocksByFile(File plainFile) {
+        List[] block = new List[0];
+
+        try {
+
+            String[] hex = readByteFileToHex(plainFile);
+
+            block = new List[hex.length / 16];
+
+            String[][] splitKeys = new String[block.length][];
+            for (int i = 0; i < splitKeys.length; i++) {
+                splitKeys[i] = Arrays.copyOfRange(hex, i * 16, i * 16 + 16);
+            }
+
+            for (int i = 0; i < splitKeys.length; i++) {
+                block[i] = arrayToMatrix(splitKeys[i]);
+            }
+
+        } catch (IOException e) {
+            System.out.println("error in getBlocksByFile");
+
+        }
+        return block;
+
+    }
 }
+
