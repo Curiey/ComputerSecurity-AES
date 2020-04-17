@@ -64,7 +64,7 @@ public class AesDec {
     /***
      * Shift columns to a given 2-dim ArrayList.
      * shift each column of index i, i shifts down.
-     *
+//     *
      * @param matrixToShift 2-dim ArrayList to shift.
      *
      * @return 2-dim ArrayList shifted.
